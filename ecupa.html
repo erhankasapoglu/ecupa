@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ECUPA Product Search</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f5f6fa;
+  }
+  h2 {
+    text-align: center;
+    color: #333;
+  }
+  #searchBox {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  input[type="text"] {
+    width: 70%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  #results {
+    display: grid;
+    gap: 12px;
+  }
+  .item {
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .item-title {
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 4px;
+  }
+  .item-slug {
+    font-size: 14px;
+    color: #555;
+    word-break: break-all;
+  }
+</style>
+</head>
+<body>
+  <h2>ECUPA Product Search</h2>
+
+  <div id="searchBox">
+    <input type="text" id="query" placeholder="Type to search..." oninput="searchProducts()" />
+  </div>
+
+  <div id="results"></div>
+
+  <script>
+    let debounceTimer;
+
+    async function searchProducts() {
+      const query = document.getElementById("query").value.trim();
+      const resultsDiv = document.getElementById("results");
+      
+      clearTimeout(debounceTimer);
+
+      // debounce: 400ms beklemeden sonra istek at
+      debounceTimer = setTimeout(async () => {
+        if (!query) {
+          resultsDiv.innerHTML = "";
+          return;
+        }
+
+        resultsDiv.innerHTML = "🔎 Searching...";
+
+        try {
+          const res = await fetch(`https://portal.ecupa.com.tr/api/products?search=${encodeURIComponent(query)}&locale=en`);
+          const data = await res.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            resultsDiv.innerHTML = "<p>No results found.</p>";
+            return;
+          }
+
+          // JSON düzgün çekiliyor mu görmek için:
+          console.log("API response:", data);
+
+          resultsDiv.innerHTML = data.map(item => `
+            <div class="item">
+              <div class="item-title">${item.title || "Untitled Product"}</div>
+              <div class="item-slug">${item.slug || ""}</div>
+            </div>
+          `).join('');
+
+        } catch (err) {
+          resultsDiv.innerHTML = "<p style='color:red;'>⚠️ Error loading products.</p>";
+          console.error(err);
+        }
+      }, 400);
+    }
+  </script>
+</body>
+</html>
