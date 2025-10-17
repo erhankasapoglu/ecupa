@@ -31,15 +31,29 @@
     gap: 12px;
   }
   .item {
+    display: flex;
+    align-items: center;
     background: white;
     padding: 12px;
     border-radius: 8px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    gap: 12px;
   }
-  .item-title {
+  .item img {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: contain;
+  }
+  .item-details {
+    flex: 1;
+  }
+  .item-title a {
     font-weight: bold;
     color: #222;
-    margin-bottom: 4px;
+    text-decoration: none;
+  }
+  .item-title a:hover {
+    text-decoration: underline;
   }
   .item-slug {
     font-size: 14px;
@@ -63,10 +77,8 @@
     async function searchProducts() {
       const query = document.getElementById("query").value.trim();
       const resultsDiv = document.getElementById("results");
-      
-      clearTimeout(debounceTimer);
 
-      // debounce: 400ms beklemeden sonra istek at
+      clearTimeout(debounceTimer);
       debounceTimer = setTimeout(async () => {
         if (!query) {
           resultsDiv.innerHTML = "";
@@ -84,15 +96,25 @@
             return;
           }
 
-          // JSON düzgün çekiliyor mu görmek için:
-          console.log("API response:", data);
-
-          resultsDiv.innerHTML = data.map(item => `
-            <div class="item">
-              <div class="item-title">${item.title || "Untitled Product"}</div>
-              <div class="item-slug">${item.slug || ""}</div>
-            </div>
-          `).join('');
+          resultsDiv.innerHTML = data.map(item => {
+            // Resim URL'i title’dan türetiliyor
+            const imgUrl = item.title ? 
+              `https://portal.ecupa.com.tr/uploads/products/${item.title.split(' ')[0]}.webp`
+              : '';
+            return `
+              <div class="item">
+                ${imgUrl ? `<img src="${imgUrl}" alt="${item.title}" />` : ''}
+                <div class="item-details">
+                  <div class="item-title">
+                    <a href="https://portal.ecupa.com.tr/en/products/${item.slug}" target="_blank">
+                      ${item.title || "Untitled Product"}
+                    </a>
+                  </div>
+                  <div class="item-slug">${item.slug || ''}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
 
         } catch (err) {
           resultsDiv.innerHTML = "<p style='color:red;'>⚠️ Error loading products.</p>";
