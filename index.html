@@ -97,16 +97,15 @@
           }
 
           resultsDiv.innerHTML = data.map(item => {
-            // Resim URL'i title’dan türetiliyor
-            const imgUrl = item.title ? 
-              `https://portal.ecupa.com.tr/uploads/products/${item.title.split(' ')[0]}.webp`
-              : '';
+            // Resim URL’i title’dan türetiliyor
+            const titleKey = item.title ? item.title.split(' ')[0] : '';
+            const imgUrl = titleKey ? `https://portal.ecupa.com.tr/uploads/products/${titleKey}.webp` : '';
             return `
               <div class="item">
                 ${imgUrl ? `<img src="${imgUrl}" alt="${item.title}" />` : ''}
                 <div class="item-details">
                   <div class="item-title">
-                    <a href="https://portal.ecupa.com.tr/en/products/${item.slug}" target="_blank">
+                    <a href="https://portal.ecupa.com.tr/en/${item.slug}" target="_blank">
                       ${item.title || "Untitled Product"}
                     </a>
                   </div>
